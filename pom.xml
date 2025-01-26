@@ -42,6 +42,21 @@
             <groupId>io.quarkiverse.amazonservices</groupId>
             <artifactId>quarkus-amazon-ssm</artifactId>
         </dependency>
+        <!-- required for ssm client -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>url-connection-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>apache-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-netty</artifactId>
+        </dependency> 
+        <!-- end required for ssm client -->
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-picocli</artifactId>
@@ -50,16 +65,22 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>
         </dependency>
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
             <scope>test</scope>
         </dependency>
-    
+
         <dependency>
-            <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.9</version>
+            <groupId>org.apache.commons</groupId>
+            <version>3.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.verils</groupId>
+            <artifactId>gotemplate4j</artifactId>
+            <version>0.3.1</version>
         </dependency>
     </dependencies>
 
@@ -134,8 +155,8 @@
                             <include>.gitignore</include>
                             </includes>
                             <!-- define the steps to apply to those files -->
-                            <trimTrailingWhitespace/>
-                            <endWithNewline/>
+                            <trimTrailingWhitespace />
+                            <endWithNewline />
                             <indent>
                             <tabs>true</tabs>
                             <spacesPerTab>4</spacesPerTab>
