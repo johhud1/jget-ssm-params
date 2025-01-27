@@ -7,6 +7,7 @@
 
     <properties>
         <compiler-plugin.version>3.13.0</compiler-plugin.version>
+        <java.version>21</java.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -81,6 +82,12 @@
             <groupId>io.github.verils</groupId>
             <artifactId>gotemplate4j</artifactId>
             <version>0.3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.checkerframework</groupId>
+            <artifactId>checker-qual</artifactId>
+            <version>3.48.4</version>
         </dependency>
     </dependencies>
 
@@ -173,6 +180,9 @@
                             <style>PALANTIR</style>                       <!-- or AOSP/GOOGLE (optional) -->
                             <formatJavadoc>false</formatJavadoc>          <!-- defaults to false (optional, requires at least Palantir 2.39.0) -->
                         </palantirJavaFormat>
+                        <importOrder /> <!-- standard import order -->
+                        <removeUnusedImports />
+                        <formatAnnotations />
                     </java>
                 </configuration>
                 </plugin>
@@ -191,6 +201,50 @@
                 <skipITs>false</skipITs>
                 <quarkus.native.enabled>true</quarkus.native.enabled>
             </properties>
+        </profile>
+        <profile> 
+            <id>checkerframework</id>
+            <!-- If you omit the activation block, run mvn with "-P checkerframework" to run checkers. -->
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                        <fork>true</fork> <!-- Must fork or else JVM arguments are ignored. -->
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.checkerframework</groupId>
+                                <artifactId>checker</artifactId>
+                                <version>3.48.4</version>
+                            </path>
+                        </annotationProcessorPaths>
+                        <annotationProcessors>
+                            <!-- Add all the checkers you want to enable here -->
+                            <annotationProcessor>org.checkerframework.checker.nullness.NullnessChecker</annotationProcessor>
+                        </annotationProcessors>
+                        <compilerArgs>
+                            <arg>-Xmaxerrs</arg>
+                            <arg>10000</arg>
+                            <arg>-Xmaxwarns</arg>
+                            <arg>10000</arg>
+                            <!-- <arg>-Awarns</arg> --> <!-- -Awarns turns type-checking errors into warnings. -->
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+                        </compilerArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>
