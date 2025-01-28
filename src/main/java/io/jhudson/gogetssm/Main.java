@@ -2,23 +2,26 @@ package io.jhudson.gogetssm;
 
 import static java.util.stream.Collectors.toMap;
 
-import io.github.verils.gotemplate.Template;
-import io.github.verils.gotemplate.TemplateException;
-import io.quarkus.logging.Log;
-import io.smallrye.common.constraint.Assert;
-import jakarta.inject.Inject;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import io.github.verils.gotemplate.Template;
+import io.github.verils.gotemplate.TemplateException;
+import io.quarkus.logging.Log;
+import io.quarkus.runtime.QuarkusApplication;
+import io.smallrye.common.constraint.Assert;
+import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ITypeConverter;
@@ -33,7 +36,7 @@ import software.amazon.awssdk.services.ssm.model.Parameter;
         mixinStandardHelpOptions = true,
         description = "gets parameters from AWS SSM parameter store and outputs them to local environment",
         versionProvider = ManifestVersionProvider.class)
-public class Main implements Callable<Integer> {
+public class Main implements Runnable, QuarkusApplication  {
 
     @Option(
             names = {"-o", "--output"},
@@ -63,6 +66,8 @@ public class Main implements Callable<Integer> {
     // TODO: configure ssm client using parsed command line arguments
     // see
     // https://quarkus.io/guides/picocli#configure-cdi-beans-with-parsed-arguments
+    @Inject
+    CommandLine.IFactory factory; 
 
     public static void main(String[] args) {
         // this is a just a sample for validating that nullness checker is working
@@ -79,9 +84,29 @@ public class Main implements Callable<Integer> {
      * variable
      * return 0 is successful -1 otherwise
      */
+    // @Override
+    // public Integer call() {
+    //     try {
+    //         checkNotNullParam("ouput", output);
+    //         checkNotNullParam("path", path);
+    //         checkNotNullParam("region", region);
+    //         checkNotNullParam("ssm", ssm);
+
+    //         Map<String, String> results =
+    //                 ssm.getParametersByPath(generateGetParametersByPathRequest(path)).parameters().stream()
+    //                         .collect(parametersToMap(path));
+    //         Log.info("ssm parameters retrieved: " + results);
+    //         renderOut(output, results);
+    //     } catch (Exception e) {
+    //         Log.error("error retrieving ssm parameters: " + e.getMessage());
+    //         return -1;
+    //     }
+    //     return 0;
+    // }
+
     @Override
-    public Integer call() {
-        try {
+    public void run() {
+        // try {
             checkNotNullParam("ouput", output);
             checkNotNullParam("path", path);
             checkNotNullParam("region", region);
@@ -92,11 +117,16 @@ public class Main implements Callable<Integer> {
                             .collect(parametersToMap(path));
             Log.info("ssm parameters retrieved: " + results);
             renderOut(output, results);
-        } catch (Exception e) {
-            Log.error("error retrieving ssm parameters: " + e.getMessage());
-            return -1;
-        }
-        return 0;
+        // } catch (Exception e) {
+        //     Log.error("error retrieving ssm parameters: " + e.getMessage());
+        //     return -1;
+        // }
+        // return 0;
+    }
+
+    @Override
+    public int run(String... args) throws Exception {
+        return new CommandLine(this, factory).execute(args);
     }
 
     private static Collector<Parameter, ?, Map<String, String>> parametersToMap(String path) {
@@ -134,41 +164,40 @@ public class Main implements Callable<Integer> {
     }
 
     private void renderOut(OutputOption output, Map<String, String> results) {
-        switch (output) {
-            case SHELL:
-                renderOutShell(results);
-                break;
-            case JSON:
-                renderOutJson(results);
-                break;
-            case TEXT:
-                renderOutText(results);
-                break;
-            case TEMPLATE:
-                renderOutTemplate(results);
-                break;
-        }
+        System.out.println(
+            switch (output) {
+                case SHELL ->  renderOutShell(results);
+                case JSON -> renderOutJson(results);
+                case TEXT -> renderOutText(results);
+                case TEMPLATE -> renderOutTemplate(results);
+        });
     }
 
-    private void renderOutShell(Map<String, String> results) {
-        results.entrySet().forEach(e -> System.out.println("export " + e.getKey() + "=" + e.getValue()));
+    //TODO: fix these render out methods
+    private String renderOutShell(Map<String, String> results) {
+        // StringBuilder sb = new StringBuilder();
+        // results.entrySet().forEach(e -> sb.append("export " + e.getKey() + "=" + e.getValue()));
+        // return sb.toString();
+        return results.entrySet().stream()
+            .map((e) -> "export " + e.getKey() + "=" + e.getValue())
+            .collect(Collectors.joining("\n"));
     }
 
-    private void renderOutJson(Map<String, String> results) {
-        System.out.println(results);
+    private String renderOutJson(Map<String, String> results) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        results.entrySet().forEach(e -> sb.append("\"" + e.getKey() + "\": \"" + e.getValue() + "\","));
+        sb.append("}");
+        return sb.toString();
     }
 
-    private void renderOutText(Map<String, String> results) {
-        results.entrySet().forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));
+    private String renderOutText(Map<String, String> results) {
+        StringBuilder sb = new StringBuilder();
+        results.entrySet().forEach(e -> sb.append(e.getKey() + "=" + e.getValue()));
+        return sb.toString();
     }
 
-    @SuppressWarnings("contracts.postcondition")
-    @EnsuresNonNull("#2")
-    private void checkNotNullParam(String name, @Nullable Object value) {
-        Assert.checkNotNullParam(name, value);
-    }
-
-    private void renderOutTemplate(Map<String, String> results) {
+    private String renderOutTemplate(Map<String, String> results) {
         checkNotNullParam("templatePath", templatePath);
         // Prepare you template
         Template template = new Template("demo");
@@ -178,10 +207,16 @@ public class Main implements Callable<Integer> {
             // Execute and print out the result text
             StringWriter writer = new StringWriter();
             template.execute(writer, results);
-            System.out.print(writer.toString());
+            return writer.toString();
         } catch (TemplateException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @SuppressWarnings("contracts.postcondition")
+    @EnsuresNonNull("#2")
+    private void checkNotNullParam(String name, @Nullable Object value) {
+        Assert.checkNotNullParam(name, value);
     }
 
     public static class RegionConverter implements ITypeConverter<Region> {
