@@ -1,5 +1,26 @@
 # jget-ssm-params
 
+A java port of https://github.com/justmiles/go-get-ssm-params
+
+Installation: download the binary from the releases page and execute. Currently only building for linux-x86_64
+
+`./jget-ssm-params --help`
+```
+Usage: get-ssm-params [-hV] [-o=<output>] [-p=<path>] [-t=<templatePath>]
+gets parameters from AWS SSM parameter store and outputs them to local environment.
+Region and other SSM client configuration can be set via environment variables.
+See https://docs.quarkiverse.io/quarkus-amazon-services/dev/amazon-ssm.html#quarkus-amazon-ssm_section_quarkus-ssm for detailed SSM client configuration options
+  -h, --help              Show this help message and exit.
+  -o, --output=<output>   Format of the output that the SSM parameters will be written in
+  -p, --path=<path>
+  -t, --template=<templatePath>
+                          Path to a template file that will be used to render the output
+  -V, --version           Print version information and exit.
+  ```
+
+
+Mainly a test bed for exploring Quarkus and various java tools.
+
 This project uses Quarkus, to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
 
 The project is following Convetional Commits: read more at <https://www.conventionalcommits.org/en/v1.0.0/>.
