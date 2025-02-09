@@ -343,6 +343,25 @@
                                     </changelog>
                                 </github>
                                 </release>
+                                <distributions>
+                                    <jget-ssm-params>
+                                        <type>BINARY</type>
+                                        <artifacts>
+                                        <artifact>
+                                            <path>${distribution.directory}/{{distributionName}}-{{projectVersion}}-linux-x86_64.tar.gz</path>
+                                            <platform>linux-x86_64</platform>
+                                        </artifact>
+                                        <artifact>
+                                            <path>${distribution.directory}/{{distributionName}}-{{projectVersion}}-windows-x86_64.zip</path>
+                                            <platform>windows-x86_64</platform>
+                                        </artifact>
+                                        <artifact>
+                                            <path>${distribution.directory}/{{distributionName}}-{{projectVersion}}-osx-x86_64.zip</path>
+                                            <platform>osx-x86_64</platform>
+                                        </artifact>
+                                        </artifacts>
+                                    </jget-ssm-params>
+                                </distributions>
                             </jreleaser>
                         </configuration>
                     </plugin>

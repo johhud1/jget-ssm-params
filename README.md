@@ -1,8 +1,11 @@
 # jget-ssm-params
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+This project uses Quarkus, to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+The project is following Convetional Commits: read more at <https://www.conventionalcommits.org/en/v1.0.0/>.
+
+The project is using JReleaser for releases: read more at <https://jreleaser.org/>.
+
 
 ## Running the application in dev mode
 
