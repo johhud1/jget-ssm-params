@@ -2,6 +2,11 @@ package io.jhudson.gogetssm;
 
 import static java.util.stream.Collectors.toMap;
 
+import io.github.verils.gotemplate.Template;
+import io.github.verils.gotemplate.TemplateException;
+import io.quarkus.logging.Log;
+import io.smallrye.common.constraint.Assert;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Files;
@@ -9,18 +14,11 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import io.github.verils.gotemplate.Template;
-import io.github.verils.gotemplate.TemplateException;
-import io.quarkus.logging.Log;
-import io.smallrye.common.constraint.Assert;
-import jakarta.inject.Inject;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ITypeConverter;
 import picocli.CommandLine.Option;
@@ -29,26 +27,36 @@ import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.GetParametersByPathRequest;
 import software.amazon.awssdk.services.ssm.model.Parameter;
 
-@Command(name = "get-ssm-params", mixinStandardHelpOptions = true, description = {
-        "gets parameters from AWS SSM parameter store and outputs them to local environment. ",
-        "Region and other SSM client configuration can be set via environment variables. ",
-        "See https://docs.quarkiverse.io/quarkus-amazon-services/dev/amazon-ssm.html#quarkus-amazon-ssm_section_quarkus-ssm for detailed SSM client configuration options" }, versionProvider = ManifestVersionProvider.class, usageHelpAutoWidth = true)
+@Command(
+        name = "get-ssm-params",
+        mixinStandardHelpOptions = true,
+        description = {
+            "gets parameters from AWS SSM parameter store and outputs them to local environment. ",
+            "Region and other SSM client configuration can be set via environment variables. ",
+            "See https://docs.quarkiverse.io/quarkus-amazon-services/dev/amazon-ssm.html#quarkus-amazon-ssm_section_quarkus-ssm for detailed SSM client configuration options"
+        },
+        versionProvider = ManifestVersionProvider.class,
+        usageHelpAutoWidth = true)
 public class Main implements Runnable {
 
-    @Option(names = { "-o",
-            "--output" }, description = "Format of the output that the SSM parameters will be written in", defaultValue = "JSON")
+    @Option(
+            names = {"-o", "--output"},
+            description = "Format of the output that the SSM parameters will be written in",
+            defaultValue = "JSON")
     private @MonotonicNonNull OutputOption output;
 
-    @Option(names = { "-p", "--path" }, defaultValue = "/")
+    @Option(
+            names = {"-p", "--path"},
+            defaultValue = "/")
     private @MonotonicNonNull String path;
 
-    @Option(names = { "-t",
-            "--template" }, description = "Path to a template file that will be used to render the output")
+    @Option(
+            names = {"-t", "--template"},
+            description = "Path to a template file that will be used to render the output")
     private @Nullable Path templatePath;
 
     @Inject
-    @MonotonicNonNull
-    SsmClient ssm;
+    @MonotonicNonNull SsmClient ssm;
 
     // public static void main(String[] args) {
     // // this is a just a sample for validating that nullness checker is working
@@ -66,9 +74,9 @@ public class Main implements Runnable {
         checkNotNullParam("path", path);
         checkNotNullParam("ssm", ssm);
 
-        Map<String, String> results = ssm.getParametersByPath(generateGetParametersByPathRequest(path)).parameters()
-                .stream()
-                .collect(parametersToMap(path));
+        Map<String, String> results =
+                ssm.getParametersByPath(generateGetParametersByPathRequest(path)).parameters().stream()
+                        .collect(parametersToMap(path));
         Log.info("ssm parameters retrieved: " + results);
         renderOut(output, results);
     }
@@ -125,9 +133,10 @@ public class Main implements Runnable {
     }
 
     private String renderOutJson(Map<String, String> results) {
-        return "{" + results.entrySet().stream()
-                .map((e) -> "\"" + e.getKey() + "\": \"" + e.getValue() + "\"")
-                .collect(Collectors.joining(","))
+        return "{"
+                + results.entrySet().stream()
+                        .map((e) -> "\"" + e.getKey() + "\": \"" + e.getValue() + "\"")
+                        .collect(Collectors.joining(","))
                 + "}";
     }
 
