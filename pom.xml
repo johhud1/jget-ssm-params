@@ -10,6 +10,12 @@
     <inceptionYear>2025</inceptionYear>
     <url>https://github.com/johhud1/jget-ssm-params</url>
 
+    <scm>
+        <url>scm:git:git@github.com:johhud1/jget-ssm-params</url>
+        <connection>scm:git:git@github.com:johhud1/jget-ssm-params</connection>
+        <developerConnection>scm:git:git@github.com:johhud1/jget-ssm-params</developerConnection>
+    </scm>
+
    <developers>
         <developer>
             <id>johhud1</id>
