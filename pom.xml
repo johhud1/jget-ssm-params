@@ -39,7 +39,6 @@
 
         <compiler-plugin.version>3.13.0</compiler-plugin.version>
         <assembly-plugin.version>3.4.2</assembly-plugin.version>
-        <jreleaser-plugin.version>1.3.0</jreleaser-plugin.version>
         <os-plugin.version>1.7.0</os-plugin.version>
         <executable-suffix />
         <distribution.directory>${project.build.directory}/distributions</distribution.directory>
@@ -339,7 +338,7 @@
                     <plugin>
                         <groupId>org.jreleaser</groupId>
                         <artifactId>jreleaser-maven-plugin</artifactId>
-                        <version>1.6.0</version>
+                        <version>1.16.0</version>
                         <configuration>
                             <jreleaser>
                                 <release>
