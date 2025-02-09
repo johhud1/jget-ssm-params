@@ -21,7 +21,6 @@ import io.github.verils.gotemplate.TemplateException;
 import io.quarkus.logging.Log;
 import io.smallrye.common.constraint.Assert;
 import jakarta.inject.Inject;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ITypeConverter;
 import picocli.CommandLine.Option;

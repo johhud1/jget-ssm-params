@@ -5,12 +5,24 @@
     <artifactId>jget-ssm-params</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
+    <name>jget-ssm-params</name>
+    <description>jget-ssm-params - Get and export AWS SSM parameter store values</description>
+    <inceptionYear>2025</inceptionYear>
+    <url>https://github.com/johhud1/jget-ssm-params</url>
+
     <properties>
-        <compiler-plugin.version>3.13.0</compiler-plugin.version>
-        <java.version>21</java.version>
-        <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>21</java.version>
+        <maven.compiler.release>21</maven.compiler.release>
+
+        <compiler-plugin.version>3.13.0</compiler-plugin.version>
+        <assembly-plugin.version>3.4.2</assembly-plugin.version>
+        <jreleaser-plugin.version>1.3.0</jreleaser-plugin.version>
+        <os-plugin.version>1.7.0</os-plugin.version>
+        <executable-suffix/>
+        <distribution.directory>${project.build.directory}/distributions</distribution.directory>
+
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.17.7</quarkus.platform.version>
@@ -91,6 +103,14 @@
     </dependencies>
 
     <build>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>${os-plugin.version}</version>
+            </extension>
+        </extensions>
+
         <plugins>
             <plugin>
                 <groupId>${quarkus.platform.group-id}</groupId>
@@ -189,6 +209,7 @@
     </build>
 
     <profiles>
+
         <profile>
             <id>native</id>
             <activation>
@@ -201,6 +222,50 @@
                 <quarkus.native.enabled>true</quarkus.native.enabled>
             </properties>
         </profile>
+
+        <profile>
+            <id>dist</id>
+            <build>
+                <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${assembly-plugin.version}</version>
+                    <configuration>
+                    <attach>false</attach>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <finalName>${project.artifactId}-${project.version}-${os.detected.classifier}</finalName>
+                    <outputDirectory>${distribution.directory}</outputDirectory>
+                    <workDirectory>${project.build.directory}/assembly/work</workDirectory>
+                    <descriptors>
+                        <descriptor>src/main/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                    </configuration>
+                    <executions>
+                    <execution>
+                        <id>make-distribution</id>
+                        <phase>package</phase>
+                        <goals>
+                        <goal>single</goal>
+                        </goals>
+                    </execution>
+                    </executions>
+                </plugin>
+                </plugins>
+            </build>
+            </profile>
+            <profile>
+            <id>dist-windows</id>
+            <activation>
+                <os>
+                <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <executable-suffix>.exe</executable-suffix>
+            </properties>
+        </profile>
+
         <profile> 
             <id>checkerframework</id>
             <!-- If you omit the activation block, run mvn with "-P checkerframework" to run checkers. -->
