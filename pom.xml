@@ -10,6 +10,20 @@
     <inceptionYear>2025</inceptionYear>
     <url>https://github.com/johhud1/jget-ssm-params</url>
 
+   <developers>
+        <developer>
+            <id>johhud1</id>
+            <name>John Hudson</name>
+        </developer>
+    </developers>
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>https://raw.githubusercontent.com/johhud1/jget-ssm-params/refs/heads/master/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -223,6 +237,52 @@
             </properties>
         </profile>
 
+        <profile> 
+            <id>checkerframework</id>
+            <!-- If you omit the activation block, run mvn with "-P checkerframework" to run checkers. -->
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                        <fork>true</fork> <!-- Must fork or else JVM arguments are ignored. -->
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.checkerframework</groupId>
+                                <artifactId>checker</artifactId>
+                                <version>3.48.4</version>
+                            </path>
+                        </annotationProcessorPaths>
+                        <annotationProcessors>
+                            <!-- Add all the checkers you want to enable here -->
+                            <annotationProcessor>org.checkerframework.checker.nullness.NullnessChecker</annotationProcessor>
+                        </annotationProcessors>
+                        <compilerArgs>
+                            <arg>-Xmaxerrs</arg>
+                            <arg>10000</arg>
+                            <arg>-Xmaxwarns</arg>
+                            <arg>10000</arg>
+                            <!-- <arg>-Awarns</arg> --> <!-- -Awarns turns type-checking errors into warnings. -->
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+                        </compilerArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!--release related profiles-->
         <profile>
             <id>dist</id>
             <build>
@@ -265,46 +325,25 @@
                 <executable-suffix>.exe</executable-suffix>
             </properties>
         </profile>
-
-        <profile> 
-            <id>checkerframework</id>
-            <!-- If you omit the activation block, run mvn with "-P checkerframework" to run checkers. -->
-            <activation>
-                <jdk>[9,)</jdk>
-            </activation>
+        <profile>
+            <id>release</id>
             <build>
                 <plugins>
                     <plugin>
-                        <artifactId>maven-compiler-plugin</artifactId>
+                        <groupId>org.jreleaser</groupId>
+                        <artifactId>jreleaser-maven-plugin</artifactId>
+                        <version>1.6.0</version>
                         <configuration>
-                        <fork>true</fork> <!-- Must fork or else JVM arguments are ignored. -->
-                        <annotationProcessorPaths>
-                            <path>
-                                <groupId>org.checkerframework</groupId>
-                                <artifactId>checker</artifactId>
-                                <version>3.48.4</version>
-                            </path>
-                        </annotationProcessorPaths>
-                        <annotationProcessors>
-                            <!-- Add all the checkers you want to enable here -->
-                            <annotationProcessor>org.checkerframework.checker.nullness.NullnessChecker</annotationProcessor>
-                        </annotationProcessors>
-                        <compilerArgs>
-                            <arg>-Xmaxerrs</arg>
-                            <arg>10000</arg>
-                            <arg>-Xmaxwarns</arg>
-                            <arg>10000</arg>
-                            <!-- <arg>-Awarns</arg> --> <!-- -Awarns turns type-checking errors into warnings. -->
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
-                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
-                        </compilerArgs>
+                            <jreleaser>
+                                <release>
+                                <github>
+                                    <changelog>
+                                    <formatted>ALWAYS</formatted>
+                                    <preset>conventional-commits</preset>
+                                    </changelog>
+                                </github>
+                                </release>
+                            </jreleaser>
                         </configuration>
                     </plugin>
                 </plugins>
