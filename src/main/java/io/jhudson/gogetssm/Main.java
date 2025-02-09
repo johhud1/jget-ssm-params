@@ -19,7 +19,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import io.github.verils.gotemplate.Template;
 import io.github.verils.gotemplate.TemplateException;
 import io.quarkus.logging.Log;
-import io.quarkus.runtime.QuarkusApplication;
 import io.smallrye.common.constraint.Assert;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
@@ -34,9 +33,12 @@ import software.amazon.awssdk.services.ssm.model.Parameter;
 @Command(
         name = "get-ssm-params",
         mixinStandardHelpOptions = true,
-        description = "gets parameters from AWS SSM parameter store and outputs them to local environment",
+        description = "gets parameters from AWS SSM parameter store and outputs them to local environment. " +
+            "Region and other SSM client configuration can be set via environment variables;" +
+            "see https://docs.quarkiverse.io/quarkus-amazon-services/dev/amazon-ssm.html#quarkus-amazon-ssm_section_quarkus-ssm" +
+            "for details",
         versionProvider = ManifestVersionProvider.class)
-public class Main implements Runnable, QuarkusApplication  {
+public class Main implements Runnable  {
 
     @Option(
             names = {"-o", "--output"},
@@ -50,11 +52,11 @@ public class Main implements Runnable, QuarkusApplication  {
     private @MonotonicNonNull String path;
 
     // this is not doing anything; see todo note on the SSM param
-    @Option(
-            names = {"-r", "--region"},
-            defaultValue = "us-east-1",
-            converter = RegionConverter.class)
-    private @MonotonicNonNull Region region;
+    // @Option(
+    //         names = {"-r", "--region"},
+    //         defaultValue = "us-east-1",
+    //         converter = RegionConverter.class)
+    // private @MonotonicNonNull Region region;
 
     @Option(
             names = {"-t", "--template"},
@@ -63,70 +65,29 @@ public class Main implements Runnable, QuarkusApplication  {
 
     @Inject
     @MonotonicNonNull SsmClient ssm;
-    // TODO: configure ssm client using parsed command line arguments
-    // see
-    // https://quarkus.io/guides/picocli#configure-cdi-beans-with-parsed-arguments
-    @Inject
-    CommandLine.IFactory factory; 
 
-    public static void main(String[] args) {
-        // this is a just a sample for validating that nullness checker is working
-        // @NonNull String testing = null;
 
-        int exitCode = new CommandLine(new Main()).execute(args);
-        // TODO: handle exceptions? check what exit code picocli returns in case of
-        // exception
-        System.exit(exitCode);
-    }
+    // public static void main(String[] args) {
+    //     // this is a just a sample for validating that nullness checker is working
+    //     // @NonNull String testing = null;
 
-    /**
-     * retrieve ssm parameters from region at path and store them in a local
-     * variable
-     * return 0 is successful -1 otherwise
-     */
-    // @Override
-    // public Integer call() {
-    //     try {
-    //         checkNotNullParam("ouput", output);
-    //         checkNotNullParam("path", path);
-    //         checkNotNullParam("region", region);
-    //         checkNotNullParam("ssm", ssm);
-
-    //         Map<String, String> results =
-    //                 ssm.getParametersByPath(generateGetParametersByPathRequest(path)).parameters().stream()
-    //                         .collect(parametersToMap(path));
-    //         Log.info("ssm parameters retrieved: " + results);
-    //         renderOut(output, results);
-    //     } catch (Exception e) {
-    //         Log.error("error retrieving ssm parameters: " + e.getMessage());
-    //         return -1;
-    //     }
-    //     return 0;
+    //     int exitCode = new CommandLine(new Main()).execute(args);
+    //     // TODO: handle exceptions? check what exit code picocli returns in case of
+    //     // exception
+    //     System.exit(exitCode);
     // }
 
     @Override
     public void run() {
-        // try {
-            checkNotNullParam("ouput", output);
-            checkNotNullParam("path", path);
-            checkNotNullParam("region", region);
-            checkNotNullParam("ssm", ssm);
+        checkNotNullParam("ouput", output);
+        checkNotNullParam("path", path);
+        checkNotNullParam("ssm", ssm);
 
-            Map<String, String> results =
-                    ssm.getParametersByPath(generateGetParametersByPathRequest(path)).parameters().stream()
-                            .collect(parametersToMap(path));
-            Log.info("ssm parameters retrieved: " + results);
-            renderOut(output, results);
-        // } catch (Exception e) {
-        //     Log.error("error retrieving ssm parameters: " + e.getMessage());
-        //     return -1;
-        // }
-        // return 0;
-    }
-
-    @Override
-    public int run(String... args) throws Exception {
-        return new CommandLine(this, factory).execute(args);
+        Map<String, String> results =
+                ssm.getParametersByPath(generateGetParametersByPathRequest(path)).parameters().stream()
+                        .collect(parametersToMap(path));
+        Log.info("ssm parameters retrieved: " + results);
+        renderOut(output, results);
     }
 
     private static Collector<Parameter, ?, Map<String, String>> parametersToMap(String path) {
@@ -175,9 +136,6 @@ public class Main implements Runnable, QuarkusApplication  {
 
     //TODO: fix these render out methods
     private String renderOutShell(Map<String, String> results) {
-        // StringBuilder sb = new StringBuilder();
-        // results.entrySet().forEach(e -> sb.append("export " + e.getKey() + "=" + e.getValue()));
-        // return sb.toString();
         return results.entrySet().stream()
             .map((e) -> "export " + e.getKey() + "=" + e.getValue())
             .collect(Collectors.joining("\n"));
@@ -199,7 +157,7 @@ public class Main implements Runnable, QuarkusApplication  {
 
     private String renderOutTemplate(Map<String, String> results) {
         checkNotNullParam("templatePath", templatePath);
-        // Prepare you template
+        // Prepare the template
         Template template = new Template("demo");
         try {
             template.parse(Files.newBufferedReader(templatePath));
