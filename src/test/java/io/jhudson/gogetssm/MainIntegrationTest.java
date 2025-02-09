@@ -17,7 +17,6 @@ public class MainIntegrationTest {
     // and CommandLine.ExitCode.USAGE (2) for invalid input.
     // (These are common values according to this StackOverflow answer). This can be customized
 
-    // TODO: mock out SSM parameter store so we're not actually hitting AWS in this tests
 
     @Test
     @Launch(value = {"--path", "/"}, exitCode = 0)
@@ -27,13 +26,25 @@ public class MainIntegrationTest {
     @Test
     @Launch(value = {"--path", "/", "--output", "SHELL"}, exitCode = 0)
     public void testAppBaseFormatShell(LaunchResult result) {
-        Assertions.assertEquals("export mypath/to-parameters/key1=value1", result.getOutput());
+        Assertions.assertEquals(
+            "export mypath/to-parameters/key2=value2\n" + 
+            "export mypath/to-parameters/key1=value1",
+            result.getOutput());
     }
 
     @Test
     @Launch(value = {"--path", "/", "--output", "TEXT"}, exitCode = 0)
     public void testAppBaseFormatText(LaunchResult result) {
-        Assertions.assertEquals("mypath/to-parameters/key1=value1", result.getOutput());
+        Assertions.assertEquals(
+            "mypath/to-parameters/key2=value2\n"
+            + "mypath/to-parameters/key1=value1",
+            result.getOutput());
+    }
+
+    @Test
+    @Launch(value = {"--path", "/", "--output", "JSON"}, exitCode = 0)
+    public void testAppBaseFormatJson(LaunchResult result) {
+        Assertions.assertEquals("{\"mypath/to-parameters/key2\": \"value2\",\"mypath/to-parameters/key1\": \"value1\"}", result.getOutput());
     }
 
     @Test
