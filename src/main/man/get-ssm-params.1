@@ -1,0 +1,57 @@
+.TH GET-SSM-PARAMS 1 "2025-08-10" "0.1.0-SNAPSHOT" "get-ssm-params Manual"
+.SH NAME
+get-ssm-params \- gets parameters from AWS SSM parameter store and outputs them to the local environment.
+.SH SYNOPSIS
+.B get-ssm-params
+[\fB\-hV\fR]
+\fB\-p\fR, \fB\-\-path\fR=\fI<path>\fR
+[\fB\-o\fR, \fB\-\-output\fR=\fI<output>\fR]
+[\fB\-r\fR, \fB\-\-region\fR=\fI<region>\fR]
+[\fB\-t\fR, \fB\-\-template\fR=\fI<templatePath>\fR]
+.SH DESCRIPTION
+The
+.B get-ssm-params
+utility fetches parameters recursively from the AWS Systems Manager (SSM) Parameter Store for a given path. It automatically decrypts any secure string parameters. The leading path is stripped from the parameter names in the output.
+.P
+The output can be formatted as shell exports, plain text, JSON, or via a user-supplied template.
+.P
+Region and other SSM client configuration can be set via environment variables. See the Quarkus Amazon SSM documentation for more details.
+.SH OPTIONS
+.IP "\fB-h\fR, \fB--help\fR"
+Show help message and exit.
+.IP "\fB-V\fR, \fB--version\fR"
+Print version information and exit.
+.IP "\fB-p\fR, \fB--path\fR=\fI<path>\fR"
+.B Required.
+The path in the SSM parameter store to query.
+.IP "\fB-o\fR, \fB--output\fR=\fI<output>\fR"
+Specifies the output format. If not specified, the default is \fBSHELL\fR.
+The available formats are:
+.RS
+.IP "\fBSHELL\fR"
+Outputs each parameter as an `export KEY=VALUE` statement.
+.IP "\fBJSON\fR"
+Outputs all parameters as a single JSON object.
+.IP "\fBTEXT\fR"
+Outputs each parameter as a `KEY=VALUE` line.
+.IP "\fBTEMPLATE\fR"
+Formats the output using the template file specified by the \fB--template\fR option.
+.RE
+.IP "\fB-r\fR, \fB--region\fR=\fI<region>\fR"
+The AWS region to use. This can also be set via standard AWS environment variables.
+.IP "\fB-t\fR, \fB--template\fR=\fI<templatePath>\fR"
+The path to the template file to use when \fB--output\fR is \fBTEMPLATE\fR. This option is required in that case.
+.SH EXIT STATUS
+.IP "\fB0\fR"
+Successful execution.
+.IP "\fB1\fR"
+An error occurred during execution, such as a missing required option for \fBTEMPLATE\fR output or a template file that does not exist.
+.IP "\fB2\fR"
+An invalid option or value was provided, such as an unknown output format.
+.SH ENVIRONMENT
+The tool respects standard AWS environment variables for configuration, such as
+\fBAWS_REGION\fR,
+\fBAWS_ACCESS_KEY_ID\fR,
+and
+\fBAWS_SECRET_ACCESS_KEY\fR,
+as it uses the default AWS SDK client.

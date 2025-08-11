@@ -20,4 +20,14 @@
             <fileMode>0755</fileMode>
         </file>
     </files>
+    <fileSets>
+        <fileSet>
+            <directory>${project.basedir}/src/main/man</directory>
+            <outputDirectory>man</outputDirectory>
+            <fileMode>0644</fileMode>
+            <includes>
+                <include>*.1</include>
+            </includes>
+        </fileSet>
+    </fileSets>
 </assembly>
