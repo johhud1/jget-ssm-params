@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.jhudson</groupId>
     <artifactId>jget-ssm-params</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.2-SNAPSHOT</version>
 
     <name>jget-ssm-params</name>
     <description>jget-ssm-params - Get and export AWS SSM parameter store values</description>
